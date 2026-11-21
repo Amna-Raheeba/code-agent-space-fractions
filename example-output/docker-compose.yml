@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  game-component:
+    build: .
+    environment:
+      SERVICE: game-component
+      GAME_PORT: "3000"
+      DATABASE_URL: postgres://spacefractions:spacefractions@postgres:5432/spacefractions
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - elasticsearch
+
+  question-component:
+    build: .
+    environment:
+      SERVICE: question-component
+      QUESTION_PORT: "3001"
+      DATABASE_URL: postgres://spacefractions:spacefractions@postgres:5432/spacefractions
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  user-component:
+    build: .
+    environment:
+      SERVICE: user-component
+      USER_PORT: "3002"
+      DATABASE_URL: postgres://spacefractions:spacefractions@postgres:5432/spacefractions
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: spacefractions
+      POSTGRES_PASSWORD: spacefractions
+      POSTGRES_DB: spacefractions
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    ports:
+      - "5672:5672"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.14
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+
+volumes:
+  pgdata:

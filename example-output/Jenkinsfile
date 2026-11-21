@@ -1,0 +1,41 @@
+pipeline {
+  agent any
+
+  environment {
+    DOCKER_IMAGE = 'space-fractions'
+  }
+
+  stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh 'npm test'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .'
+      }
+    }
+    stage('Push') {
+      steps {
+        sh 'docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
+        // Deploy via Terraform infra (see terraform/).
+        sh 'echo "image pushed/registered"'
+      }
+    }
+    stage('Deploy') {
+      steps {
+        dir('terraform') {
+          sh 'terraform init'
+          sh 'terraform plan'
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+  }
+}

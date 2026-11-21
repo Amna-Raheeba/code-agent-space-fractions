@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: Space Fractions API
+  version: 1.0.0
+  description: >
+    HTTP interface for the Space Fractions interactive fraction-learning tool.
+    Artifact referenced by FR-1.
+paths:
+  /play:
+    get:
+      summary: Play the game
+      description: Starts (or continues) a game session and returns the game id.
+      operationId: playGame
+      responses:
+        '200':
+          description: A game session was created or continued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - gameId
+                properties:
+                  gameId:
+                    type: integer
+                    format: int32
+                    description: Identifier of the game session.
+  /game/{gameId}/score:
+    get:
+      summary: View the score for a game session.
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The current score.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - gameId
+                  - score
+                properties:
+                  gameId:
+                    type: integer
+                  score:
+                    type: integer
+        '404':
+          description: Game not found.
+components:
+  schemas:
+    PlayResponse:
+      type: object
+      required:
+        - gameId
+      properties:
+        gameId:
+          type: integer
+          format: int32
