@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+// Space Fractions internal service contracts.
+// Artifact referenced by NFR-1.
+package spacefractions.game.v1;
+
+option go_package = "spacefractions/game/v1;gamev1";
+
+// GameService exposes the game logic of the GameComponent.
+service GameService {
+  // Play starts or continues a game session.
+  rpc Play (PlayRequest) returns (PlayResponse);
+}
+
+// PlayRequest carries the game identifier as an int32 (per API contract).
+message PlayRequest {
+  int32 game_id = 1;
+}
+
+// PlayResponse echoes the game identifier as an int32 (per API contract).
+message PlayResponse {
+  int32 game_id = 1;
+}
