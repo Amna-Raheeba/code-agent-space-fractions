@@ -1,0 +1,182 @@
+{
+  "system": {
+    "name": "Space Fractions",
+    "description": "Web-based, interactive learning tool to improve fraction-solving skills for sixth-grade students.",
+    "flow": [
+      "introductory movie",
+      "main menu",
+      "fraction questions",
+      "ending scene with feedback"
+    ],
+    "style": "microservices",
+    "deployment": "cloud"
+  },
+  "components": [
+    {
+      "name": "GameComponent",
+      "responsibilities": [
+        "game logic",
+        "user interaction"
+      ],
+      "owns": "game state data"
+    },
+    {
+      "name": "QuestionComponent",
+      "responsibilities": [
+        "question management",
+        "data persistence"
+      ],
+      "owns": "question data"
+    },
+    {
+      "name": "UserComponent",
+      "responsibilities": [
+        "user authentication",
+        "authorization"
+      ],
+      "owns": "user data"
+    }
+  ],
+  "stack": {
+    "language": "Node.js 18",
+    "framework": "Express.js 4",
+    "database": "PostgreSQL 14",
+    "cache": "Redis 6",
+    "messaging": "RabbitMQ 3",
+    "search": "Elasticsearch 7",
+    "auth": "OAuth2",
+    "observability": "Prometheus 2",
+    "ci": "Jenkins 2",
+    "containers": "Docker 20",
+    "infra": "Terraform 1"
+  },
+  "apis": [
+    {
+      "method": "GET",
+      "path": "/play",
+      "summary": "Play the game",
+      "response": {
+        "gameId": "integer"
+      }
+    },
+    {
+      "service": "GameService",
+      "rpc": "Play",
+      "request": {
+        "gameId": "int32"
+      },
+      "response": {
+        "gameId": "int32"
+      }
+    }
+  ],
+  "data_models": [
+    {
+      "table": "games",
+      "columns": [
+        {
+          "name": "id",
+          "type": "SERIAL PRIMARY KEY"
+        },
+        {
+          "name": "game_state",
+          "type": "JSONB NOT NULL"
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "name": "UseCaseDiagram",
+      "view": "Scenario",
+      "plantuml": "@startuml UseCaseDiagram\nleft to right direction\nactor EndUser as \"End User\"\nactor Admin as \"Admin\"\nrectangle System {\n  usecase \"Play Game\" as (PlayGame)\n  usecase \"View Score\" as (ViewScore)\n  usecase \"Update Questions\" as (UpdateQuestions)\n  usecase \"View Help\" as (ViewHelp)\n}\nEndUser -- (PlayGame)\nEndUser -- (ViewScore)\nEndUser -- (ViewHelp)\nAdmin -- (UpdateQuestions)\n@enduml"
+    },
+    {
+      "name": "ClassDiagram",
+      "view": "Logic",
+      "plantuml": "@startuml ClassDiagram\nclass Game {\n  - id: string\n  - score: int\n  + play(): void\n  + viewScore(): int\n}\nclass Question {\n  - id: string\n  - prompt: string\n  - options: List<string>\n  + getPrompt(): string\n  + getOptions(): List<string>\n}\nclass User {\n  - id: string\n  - username: string\n  + playGame(game: Game): void\n  + viewScore(game: Game): int\n}\nclass Admin {\n  - id: string\n  - username: string\n  + updateQuestions(questions: List<Question>): void\n}\nGame --* Question\nUser --* Game\nAdmin --* Question\n@enduml"
+    },
+    {
+      "name": "ObjectDiagram",
+      "view": "Logic",
+      "plantuml": "@startuml ObjectDiagram\nparticipant game1\nparticipant question1\nparticipant user1\nparticipant admin1\ngame1 --> question1\nuser1 --> game1\nadmin1 --> question1\n@enduml"
+    },
+    {
+      "name": "StateDiagram",
+      "view": "Logic",
+      "plantuml": "@startuml StateDiagram\nstate Playing\nstate Paused\nstate GameOver\n[*] --> Playing\nPlaying --> Paused : pause()\nPaused --> Playing : resume()\nPlaying --> GameOver : gameOver()\n@enduml"
+    },
+    {
+      "name": "ActivityDiagram",
+      "view": "Process",
+      "plantuml": "@startuml ActivityDiagram\nstart\n:play game;\nif (game over?) then (yes)\n  :game over;\nelse (no)\n  :continue playing;\nendif\n:calculate score;\n:display score;\nstop\n@enduml"
+    },
+    {
+      "name": "SequenceDiagram",
+      "view": "Process",
+      "plantuml": "@startuml SequenceDiagram1\nparticipant User\nparticipant Game\nparticipant Question\nUser->>Game: play()\nGame->>Question: getPrompt()\nQuestion->>Game: return prompt\nGame->>User: display prompt\nUser->>Game: submit answer\nGame->>Question: check answer\nQuestion->>Game: return result\nGame->>User: display result\n@enduml\n@startuml SequenceDiagram2\nparticipant Admin\nparticipant Question\nAdmin->>Question: update()\nQuestion->>Admin: return success\n@enduml"
+    },
+    {
+      "name": "CollaborationDiagram",
+      "view": "Process",
+      "plantuml": "@startuml CollaborationDiagram1\nparticipant User\nparticipant Game\nparticipant Question\nUser->>Game: play()\nGame->>Question: getPrompt()\nQuestion->>Game: return prompt\nGame->>User: display prompt\nUser->>Game: submit answer\nGame->>Question: check answer\nQuestion->>Game: return result\nGame->>User: display result\nnote right of Game: Scenario: Play Game\n@enduml\n@startuml CollaborationDiagram2\nparticipant Admin\nparticipant Question\nAdmin->>Question: update()\nQuestion->>Admin: return success\nnote right of Question: Scenario: Update Questions\n@enduml"
+    },
+    {
+      "name": "PackageDiagram",
+      "view": "Development",
+      "plantuml": "@startuml PackageDiagram\npackage Game {\n  class Game\n  class Question\n}\npackage User {\n  class User\n}\npackage Admin {\n  class Admin\n}\nGame -- User\nGame -- Admin\n@enduml"
+    },
+    {
+      "name": "ComponentDiagram",
+      "view": "Development",
+      "plantuml": "@startuml ComponentDiagram\nartifact GameComponent\nartifact QuestionComponent\nartifact UserComponent\nartifact AdminComponent\nGameComponent -- QuestionComponent\nGameComponent -- UserComponent\nGameComponent -- AdminComponent\n@enduml"
+    },
+    {
+      "name": "DeploymentDiagram",
+      "view": "Physical",
+      "plantuml": "@startuml DeploymentDiagram\nnode GameServer\nnode QuestionServer\nnode UserClient\nnode AdminClient\nGameServer -- QuestionServer\nGameServer -- UserClient\nGameServer -- AdminClient\n@enduml"
+    },
+    {
+      "name": "ContainerDiagram",
+      "view": "Physical",
+      "plantuml": "@startuml ContainerDiagram\nartifact GameContainer\nartifact QuestionContainer\nartifact UserContainer\nartifact AdminContainer\nGameContainer -- QuestionContainer\nGameContainer -- UserContainer\nGameContainer -- AdminContainer\n@enduml"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "FR-1",
+      "text": "Play game",
+      "diagram": "UseCaseDiagram",
+      "component": "GameComponent",
+      "artifact": "openapi.yaml"
+    },
+    {
+      "id": "NFR-1",
+      "text": "Performance",
+      "diagram": "SequenceDiagram1",
+      "component": "GameComponent",
+      "artifact": "internal.proto"
+    },
+    {
+      "id": "ASR-1",
+      "text": "Data durability",
+      "diagram": "DeploymentDiagram",
+      "component": "QuestionComponent",
+      "artifact": "sql/question_ddl.sql"
+    }
+  ],
+  "assumptions": [
+    "The game will be played by 1000 users concurrently",
+    "The game will be played for 1 hour per session"
+  ],
+  "open_questions": [
+    "What is the expected user growth rate?",
+    "What is the expected game session length?"
+  ],
+  "input_gaps": [
+    "Traceability maps only 3 requirement(s); most of the doc's FR/NFR/ASR claims have no rows.",
+    "Test matrix in the doc is empty.",
+    "Object diagram uses sequence-diagram syntax (participant), not object syntax.",
+    "Doc contains meta sections (Analysis Plan, How to review) that are not architecture."
+  ]
+}
