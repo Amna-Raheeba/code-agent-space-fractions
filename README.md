@@ -65,6 +65,15 @@ Space Fractions generation — 24 turns, the complete project in
 limit, and the $0.90 cap was never approached. See REPORT.md for the
 full record, including the thinking-mode fix the live runs required.
 
+Two deliverables from section L of the architecture document were
+not part of that first generation: the Kubernetes manifest
+(`example-output/k8s/spacefractions-deployment.yaml`) and the
+traceability matrix (`example-output/traceability_matrix.csv`).
+They were added afterwards in a short follow-up run on the same
+output folder; no other file was changed. The matrix contains
+exactly the three mappings the document itself gives (FR-1, NFR-1,
+ASR-1) - the document traces no others.
+
 ## How the .exe is built
 
 PyInstaller cannot build a Windows .exe from Linux, so the build
