@@ -1,0 +1,160 @@
+# Space Fractions — Kubernetes manifests (one file)
+# One Deployment + one Service per service from docker-compose.yml:
+#   - game-service     port 3000
+#   - question-service port 3001
+#   - user-service     port 3002
+# Image and environment mirror docker-compose.yml (all services built from the
+# same Dockerfile context, so they share the `space-fractions` image; the
+# SERVICE env var selects each component's entrypoint).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-service
+  labels:
+    app: space-fractions
+    component: game-component
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-fractions
+      component: game-component
+  template:
+    metadata:
+      labels:
+        app: space-fractions
+        component: game-component
+    spec:
+      containers:
+        - name: game-component
+          image: space-fractions:latest
+          env:
+            - name: SERVICE
+              value: "game-component"
+            - name: GAME_PORT
+              value: "3000"
+            - name: DATABASE_URL
+              value: "postgres://spacefractions:spacefractions@postgres:5432/spacefractions"
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq:5672"
+            - name: ELASTICSEARCH_URL
+              value: "http://elasticsearch:9200"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-service
+  labels:
+    app: space-fractions
+    component: game-component
+spec:
+  selector:
+    app: space-fractions
+    component: game-component
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-service
+  labels:
+    app: space-fractions
+    component: question-component
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-fractions
+      component: question-component
+  template:
+    metadata:
+      labels:
+        app: space-fractions
+        component: question-component
+    spec:
+      containers:
+        - name: question-component
+          image: space-fractions:latest
+          env:
+            - name: SERVICE
+              value: "question-component"
+            - name: QUESTION_PORT
+              value: "3001"
+            - name: DATABASE_URL
+              value: "postgres://spacefractions:spacefractions@postgres:5432/spacefractions"
+            - name: ELASTICSEARCH_URL
+              value: "http://elasticsearch:9200"
+          ports:
+            - containerPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-service
+  labels:
+    app: space-fractions
+    component: question-component
+spec:
+  selector:
+    app: space-fractions
+    component: question-component
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: space-fractions
+    component: user-component
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-fractions
+      component: user-component
+  template:
+    metadata:
+      labels:
+        app: space-fractions
+        component: user-component
+    spec:
+      containers:
+        - name: user-component
+          image: space-fractions:latest
+          env:
+            - name: SERVICE
+              value: "user-component"
+            - name: USER_PORT
+              value: "3002"
+            - name: DATABASE_URL
+              value: "postgres://spacefractions:spacefractions@postgres:5432/spacefractions"
+          ports:
+            - containerPort: 3002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  labels:
+    app: space-fractions
+    component: user-component
+spec:
+  selector:
+    app: space-fractions
+    component: user-component
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
