@@ -94,6 +94,13 @@ def run_agent(
         if on_event is not None:
             on_event(kind, text)
 
+    emit(
+        "info",
+        "Model: {} (DeepSeek official API, {})".format(
+            config.MODEL_ID, config.BASE_URL
+        ),
+    )
+
     while turns < max_turns:
         if stop_event is not None and stop_event.is_set():
             return _finish("stopped", "Stopped by the user.", turns, budget, ctx)
