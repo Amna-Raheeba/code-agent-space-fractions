@@ -46,7 +46,7 @@ The task limit is $1. The full generation used 528,905 prompt tokens (520,832 of
 
 ## 7. The generated project
 
-The agent's real output is included in `example-output/`: three components (Game, Question, User) plus shared modules, SQL DDL, an OpenAPI file, the proto definition, a Dockerfile and docker-compose, and tests. Its own README maps every use case in the diagrams to the endpoint that implements it, and lists what the documents left open. The endpoints and tables the documents do not define (questions, scores, login, admin updates) were designed from the diagrams and are labelled as designed, not specified.
+The agent's real output is included in `example-output/`: three components (Game, Question, User) plus shared modules, SQL DDL, an OpenAPI file, the proto definition, a Dockerfile and docker-compose, and tests. Two section-L deliverables were added in a short follow-up run on the same folder: the Kubernetes manifest (`k8s/spacefractions-deployment.yaml`) and `traceability_matrix.csv`, which carries exactly the three mappings the document gives (FR-1, NFR-1, ASR-1). Its own README maps every use case in the diagrams to the endpoint that implements it, and lists what the documents left open. The endpoints and tables the documents do not define (questions, scores, login, admin updates) were designed from the diagrams and are labelled as designed, not specified.
 
 ## 8. Honest limitations
 
