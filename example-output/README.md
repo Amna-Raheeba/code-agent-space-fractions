@@ -45,7 +45,12 @@ output/
 │   ├── game-component/       # GameService, GameState, HTTP app, server
 │   ├── question-component/   # QuestionService, stores, HTTP app, server
 │   └── user-component/       # AuthService (OAuth2), HTTP app, server
-├── tests/                    # Jest + Supertest suites
+ ├── desktop/                  # Electron desktop client (see "Desktop game")
+ │   ├── main.js               #   boots services + window + HTTP/IPC bridge
+ │   ├── preload.js            #   safe renderer bridge
+ │   ├── renderer.js, index.html, styles.css
+ │   └── lib/                  #   seed bank, matcher, HTTP client, bootstrap
+├── tests/                    # Jest + Supertest suites (incl. tests/desktop/)
 ├── docker-compose.yml        # local service + data-service orchestration
 ├── Dockerfile                # multi-service Node 18 image
 ├── Jenkinsfile               # CI pipeline
@@ -74,6 +79,44 @@ Or run the full stack with Docker Compose:
 ```sh
 docker compose up --build
 ```
+
+## Desktop game (Electron)
+
+A native Windows desktop client lives in `desktop/`. It launches its own Game,
+Question and User services and plays them over HTTP — there is no second copy of
+the game logic; the screens call the running services.
+
+```sh
+npm run desktop
+```
+
+`npm run desktop` installs the desktop dependencies (Electron) once and then
+starts the app. The desktop app:
+
+1. spawns `src/game-component/server.js`, `src/question-component/server.js`
+   and `src/user-component/server.js` (ports `3000`/`3001`/`3002`, overridable
+   via `GAME_PORT`/`QUESTION_PORT`/`USER_PORT`);
+2. waits for each `/healthz`;
+3. seeds the question bank into the Question service (if empty);
+4. opens a native window with the flow from the spec: **intro screen** →
+   **main menu (Play / View Score / Help)** → **fraction questions with
+   clickable multiple-choice answers and right/wrong feedback** → **ending
+   screen showing the score**.
+
+On Windows, build/packaging instructions are the same as any Electron app:
+with the desktop dependencies installed you can package via `electron-builder`
+or `electron-packager`; those tools are not part of this deliverable.
+
+### Seed bank (designed)
+
+The architecture documents define **no questions and no correct-answer field**
+(the `Question` class exposes only `id`, `prompt`, and `options`). The desktop
+therefore ships a designed seed bank of 12 fraction questions, each with a
+`correctIndex` (0-based index into `options`) in
+`desktop/lib/seedBank.js`. The desktop seeds these into the Question service and
+maps each server-side question (by prompt) to its `correctIndex` so it can show
+right/wrong feedback. This is a design decision documented here, not a
+spec-derived field.
 
 ## APIs
 

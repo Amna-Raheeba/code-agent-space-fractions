@@ -10,7 +10,9 @@
     "start:game": "node src/game-component/server.js",
     "start:question": "node src/question-component/server.js",
     "start:user": "node src/user-component/server.js",
-    "test": "jest"
+    "test": "jest",
+    "desktop:install": "npm --prefix desktop install --no-audit --no-fund",
+    "desktop": "npm --prefix desktop install --prefer-offline --no-audit --no-fund && npm --prefix desktop start"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.17.14",
