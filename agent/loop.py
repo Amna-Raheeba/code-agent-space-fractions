@@ -136,9 +136,35 @@ def run_agent(
         tool_calls = list(getattr(message, "tool_calls", None) or [])
         messages.append(_assistant_message(message, tool_calls))
 
+        # Tool calls are executed and answered before anything else is
+        # appended: an assistant message carrying tool_calls must be
+        # followed by a tool message for every call, or the API rejects
+        # the next request. This matters most for a reply cut off at the
+        # output limit (finish_reason "length") that still carries calls.
+        for call in tool_calls:
+            if stop_event is not None and stop_event.is_set():
+                return _finish("stopped", "Stopped by the user.", turns, budget, ctx)
+            name = call.function.name
+            arguments = _parse_arguments(call)
+            emit("tool", "Tool: {} {}".format(name, _short_args(arguments)))
+            if isinstance(arguments, str):
+                # _parse_arguments returns an error string on bad JSON.
+                result = arguments
+            else:
+                result = execute_tool(ctx, name, arguments)
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": call.id,
+                    "content": result,
+                }
+            )
+            emit("tool_result", result[:500])
+
         # The reply was cut off mid-generation: ask the model to pick up
-        # where it stopped. Checked before the no-tool-calls test, so a
-        # truncated reply is never mistaken for a finished one.
+        # where it stopped. Checked after the tool calls are answered, and
+        # before the no-tool-calls test, so a truncated reply is never
+        # mistaken for a finished one.
         if finish_reason == "length":
             length_retries += 1
             if length_retries > config.MAX_CONTINUATION_RETRIES:
@@ -159,26 +185,6 @@ def run_agent(
             return _finish(
                 "done", getattr(message, "content", "") or "", turns, budget, ctx
             )
-
-        for call in tool_calls:
-            if stop_event is not None and stop_event.is_set():
-                return _finish("stopped", "Stopped by the user.", turns, budget, ctx)
-            name = call.function.name
-            arguments = _parse_arguments(call)
-            emit("tool", "Tool: {} {}".format(name, _short_args(arguments)))
-            if isinstance(arguments, str):
-                # _parse_arguments returns an error string on bad JSON.
-                result = arguments
-            else:
-                result = execute_tool(ctx, name, arguments)
-            messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": call.id,
-                    "content": result,
-                }
-            )
-            emit("tool_result", result[:500])
 
         # Compaction is a safety net, not a requirement: if the summary
         # call fails, keep going with the history as it is.
