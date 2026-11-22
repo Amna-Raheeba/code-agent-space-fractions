@@ -103,6 +103,31 @@ def test_length_finish_reason_asks_the_model_to_continue(tmp_path):
     )
 
 
+def test_length_with_tool_calls_answers_them_before_continuing(tmp_path):
+    # Regression: a reply cut off at the output limit can still carry
+    # tool calls. Those calls must be answered with tool messages before
+    # the continuation is appended, or the API rejects the next request
+    # ("insufficient tool messages following tool_calls message").
+    from conftest import FakeMessage, FakeResponse, FakeToolCall
+
+    cut_call = FakeToolCall("c1", "list_files", "{}")
+    scripted = [
+        FakeResponse(
+            FakeMessage(content=None, tool_calls=[cut_call]),
+            finish_reason="length",
+        ),
+        text_response("Finished after continuing."),
+    ]
+    result, client = _run(scripted, tmp_path)
+    assert result.status == "done"
+    second_call = client.chat.completions.calls[1]
+    tool_results = [
+        m for m in second_call["messages"] if m.get("role") == "tool"
+    ]
+    assert len(tool_results) == 1
+    assert tool_results[0]["tool_call_id"] == "c1"
+
+
 def test_transient_api_error_is_retried_then_succeeds(tmp_path):
     scripted = [
         ApiError(429, "rate limited"),
