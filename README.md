@@ -74,6 +74,18 @@ output folder; no other file was changed. The matrix contains
 exactly the three mappings the document itself gives (FR-1, NFR-1,
 ASR-1) - the document traces no others.
 
+A further run on the same folder added a desktop version of the
+game: an Electron application in `example-output/desktop/` that
+starts the three services itself and plays the game in a native
+window (intro screen, main menu, fraction questions with feedback,
+ending screen with the score), talking to the services over HTTP.
+That run cost $0.1725 and is the run shown in the demo video. The
+desktop app ships a seed bank of 12 fraction questions with a
+correct-answer index, labelled in its README as designed - the
+documents define no questions and no correct-answer field. Launch
+it with `npm run desktop`. The generated project's tests now
+number 46 across 7 suites, including the desktop client's.
+
 ## How the .exe is built
 
 PyInstaller cannot build a Windows .exe from Linux, so the build
@@ -102,5 +114,6 @@ requirements.txt
 code-agent.spec PyInstaller spec for the Windows .exe
 REPORT.md       the task report: design, verification, and real recorded costs
 example/        the structured JSON the preprocessor makes from the documents
-example-output/ the Space Fractions project from the real generation run
+example-output/ the Space Fractions project from the real generation run,
+                including the Electron desktop game in desktop/
 ```

@@ -28,19 +28,20 @@ DeepSeek turns thinking mode on by default at high effort. With tools attached, 
 
 ## 5. How I verified the work
 
-- **55 unit tests** for the agent (mocked model client): the loop, the tools, the budget guard, the preprocessor, error handling. All pass locally and in CI.
+- **58 unit tests** for the agent (mocked model client): the loop, the tools, the budget guard, the preprocessor, error handling. All pass locally and in CI. One regression test covers a reply cut off at the output limit while carrying tool calls: the calls are answered before the model is asked to continue, which the API requires.
 - **CI on windows-latest:** the same tests, then the .exe build. The artifact `code-agent-windows` is attached to the Actions run.
 - **Live tests on the real API:** a plain call, a tool call, and a second turn carrying the tool result — all succeed, and the account's usage object matches what my budget guard records.
-- **The generated game:** 29 Jest tests pass, and I ran its services and played it end to end over HTTP — add a question, list questions, check an answer, start a game, read the score, end the game.
+- **The generated game:** 46 Jest tests pass (7 suites), I ran its services and played it end to end over HTTP — add a question, list questions, check an answer, start a game, read the score, end the game — and the desktop version was played in its window from the intro screen to the final score.
 
 ## 6. What it really cost (server-reported usage)
 
-| Run | Turns | Cost |
+| Run | Turns / calls | Cost |
 |---|---|---|
 | Connectivity + tool-calling tests | 3 calls | ≈ $0.0006 |
 | Dry run (package.json + one source file) | 7 | $0.0227 |
 | **Full Space Fractions generation** | **24** | **$0.1337** |
-| **Total** | | **≈ $0.16** |
+| **Desktop (Electron) client generation** | **40 calls** | **$0.1725** |
+| **Total** | | **≈ $0.33** |
 
 The task limit is $1. The full generation used 528,905 prompt tokens (520,832 of them cache hits, which is why the cost stays low) and 25,283 completion tokens.
 
@@ -48,11 +49,13 @@ The task limit is $1. The full generation used 528,905 prompt tokens (520,832 of
 
 The agent's real output is included in `example-output/`: three components (Game, Question, User) plus shared modules, SQL DDL, an OpenAPI file, the proto definition, a Dockerfile and docker-compose, and tests. Two section-L deliverables were added in a short follow-up run on the same folder: the Kubernetes manifest (`k8s/spacefractions-deployment.yaml`) and `traceability_matrix.csv`, which carries exactly the three mappings the document gives (FR-1, NFR-1, ASR-1). Its own README maps every use case in the diagrams to the endpoint that implements it, and lists what the documents left open. The endpoints and tables the documents do not define (questions, scores, login, admin updates) were designed from the diagrams and are labelled as designed, not specified.
 
+A later run added a desktop version of the game to the same output: an Electron application (`example-output/desktop/`) that starts the Game, Question and User services itself, so `npm run desktop` launches everything. Its window follows the documented use cases - intro screen, main menu (Play, View Score, Help), fraction questions with clickable answers and feedback, and an ending screen showing the score - and it plays over HTTP against the running services. Because the documents define no questions and no correct-answer field, the desktop app ships a seed bank of 12 fraction questions with a correct-answer index, labelled as designed in its README; it seeds the Question service at launch, matches the served questions to the bank by prompt, and keeps the score tally, while the Game service still runs the game lifecycle. The generated project's tests now number 46 across 7 suites.
+
 ## 8. Honest limitations
 
 - The architecture documents map only 3 requirements, leave the test matrix empty, and use sequence-diagram syntax in the Object diagram. My preprocessor records these gaps instead of inventing requirements.
-- The generated question bank starts empty; questions are added through the admin endpoints.
-- The spec defines no "correct answer" field for a question, so answer checking validates the chosen option's bounds; right/wrong judgement is intentionally not invented.
+- The generated question bank starts empty; questions are added through the admin endpoints. The desktop client ships its own designed seed bank of 12 questions and seeds the service at launch.
+- The spec defines no "correct answer" field for a question, so the services' answer checking validates the chosen option's bounds; right/wrong judgement exists only in the desktop client's designed seed bank, not in the services.
 - OAuth2 in the generated project is a stub with an injectable verifier, and the 1,000-concurrent-user assumption is stated in the documents but was not load-tested.
 
 ## 9. How to run it
