@@ -1,0 +1,16 @@
+{
+  "name": "space-fractions-desktop",
+  "version": "1.0.0",
+  "description": "Electron desktop client for Space Fractions. Boots its own Game, Question and User services and plays over HTTP.",
+  "private": true,
+  "main": "main.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^28.2.0"
+  }
+}

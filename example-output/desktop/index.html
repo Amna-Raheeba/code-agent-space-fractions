@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';"
+    />
+    <title>Space Fractions</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <!-- Introductory movie -->
+      <section id="intro-screen" class="screen active">
+        <div class="planet" aria-hidden="true">🪐</div>
+        <h1>Space Fractions</h1>
+        <p class="tagline">Blast through fraction questions across the galaxy!</p>
+        <button id="intro-continue" class="primary">Launch</button>
+      </section>
+
+      <!-- Main menu -->
+      <section id="menu-screen" class="screen">
+        <h1>Main Menu</h1>
+        <nav class="menu">
+          <button id="menu-play" class="primary">Play</button>
+          <button id="menu-score" class="secondary">View Score</button>
+          <button id="menu-help" class="secondary">Help</button>
+        </nav>
+      </section>
+
+      <!-- Help -->
+      <section id="help-screen" class="screen">
+        <h1>How to Play</h1>
+        <p>
+          Read each fraction question, then click the answer you think is
+          correct. You will see instant feedback, and your score is shown at the
+          end of the mission.
+        </p>
+        <button id="help-back" class="secondary">Back</button>
+      </section>
+
+      <!-- Fraction questions -->
+      <section id="question-screen" class="screen">
+        <div class="hud">
+          <span id="question-progress">Question 1 of 1</span>
+          <span id="question-score">Score: 0</span>
+        </div>
+        <p id="question-prompt" class="prompt"></p>
+        <ol id="question-options" class="options"></ol>
+        <p id="question-feedback" class="feedback" role="status"></p>
+        <button id="question-next" class="primary hidden">Next</button>
+      </section>
+
+      <!-- Ending scene with feedback -->
+      <section id="ending-screen" class="screen">
+        <div class="planet" aria-hidden="true">🌌</div>
+        <h1>Mission Complete!</h1>
+        <p id="ending-score" class="score"></p>
+        <p id="ending-feedback" class="tagline"></p>
+        <nav class="menu">
+          <button id="ending-again" class="primary">Play Again</button>
+          <button id="ending-menu" class="secondary">Main Menu</button>
+        </nav>
+      </section>
+    </main>
+    <script src="renderer.js"></script>
+  </body>
+</html>
