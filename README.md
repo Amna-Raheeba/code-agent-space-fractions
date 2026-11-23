@@ -28,12 +28,36 @@ The agent runs on one model only: DeepSeek's `deepseek-v4-pro`
 through the official DeepSeek API at api.deepseek.com. That is what
 the task asks for, and there is no other provider to pick.
 
-Get a key at platform.deepseek.com: create an account, create an
-API key, and add a small top-up. The key is entered in the app and
-never stored in the repo, never baked into the .exe, and never
-written to any file.
+You need a DeepSeek API key: create an account at
+platform.deepseek.com, create a key, and add a small top-up (one full
+generation costs roughly $0.10 to $0.35). The key is typed into the
+app when it runs; it is never stored in this repo, never written to
+any file, and never baked into the .exe.
 
-From source, on any machine with Python 3.11 or newer:
+### On Windows: run the .exe and generate the game
+
+1. Download the agent: open this repository's **Actions** tab, click
+   the latest successful run of the Windows build, and download the
+   `code-agent-windows` artifact at the bottom of the run page.
+   Unzip it; inside is `code-agent.exe`.
+2. Double-click `code-agent.exe`. The agent window opens; no Python
+   installation is needed.
+3. Paste your DeepSeek API key into the key field.
+4. Select the two input documents, `Architecture_Documentation.md`
+   and `Architecture_View.md` (the task's input files).
+5. Choose an output folder. An empty folder is best, so the
+   generated project stands alone.
+6. Leave the task box empty for the standard generation, or type an
+   instruction (for example, to add something to a project that is
+   already in that folder).
+7. Click **Run**. The agent writes the project into the output
+   folder, then installs and tests the generated project itself.
+   The log ends with `Status: done`, the number of turns, and the
+   exact cost.
+
+### From source: the same agent without the .exe
+
+On any machine with Python 3.11 or newer:
 
 ```console
 pip install -r requirements.txt
@@ -43,9 +67,21 @@ python -m agent --doc Architecture_Documentation.md --view Architecture_View.md 
 The key comes from the `DEEPSEEK_API_KEY` environment variable, or
 pass `--api-key`. The generated project lands in the output folder.
 
-On Windows, the simplest way is the .exe from the GitHub Actions
-build (see below). Double-click it, fill in your DeepSeek key, pick
-the two documents and an output folder, and press Run.
+### Play the game already generated in this repo
+
+The Space Fractions project the agent generated is in
+`example-output/`, including its desktop version:
+
+```console
+cd example-output
+npm install
+npm run desktop
+```
+
+The game opens in its own window (intro screen, main menu,
+questions, ending screen with the score); the desktop app starts the
+three services itself. `npm test` in the same folder runs the
+generated project's 46 tests.
 
 ## What it costs
 
